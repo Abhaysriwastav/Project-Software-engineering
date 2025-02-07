@@ -123,8 +123,10 @@ The application provides two main dashboards:
 1. **Stock Prediction Dashboard:**
    * **Input Section:** Allows users to input the company name, sector, market cap, and current price.
    * **Screenshot of Input Parameters**
-     ![Stock Data Input](link_to_you![Dashboard_predection_result_page_1](https://github.com/user-attachments/assets/aef08383-30b7-4a03-8024-59d3474ec44f)
-r_stock_data_input_screenshot.png)
+  ![Dashboard_page_1](https://github.com/user-attachments/assets/22eb1d62-bcf4-4c93-8ea3-532dfd00a659)
+![Dashboard_page_1_half](https://github.com/user-attachments/assets/15f56ecc-44c1-4873-8686-5eccb4d4d113)
+
+
      
    * **Prediction Results:**
      * Displays the predicted stock prices for the next 7 days using both the LSTM and Random Forest models.
@@ -133,7 +135,10 @@ r_stock_data_input_screenshot.png)
      * Presents performance metrics for each model (MAE, RMSE, R2).
      * Includes a chart comparing the predictions of the two models over the 7-day period.
      * Features a chart comparing the performance metrics of the two models.
-     ![Stock Prediction Dashboard](link_to_your_stock_prediction_screenshot.png)
+      ![Dashboard_predection_result_page_1](https://github.com/user-attachments/assets/aef08383-30b7-4a03-8024-59d3474ec44f)
+      ![Dashboard_predection_result_page_2](https://github.com/user-attachments/assets/e0658675-8b7a-4cc5-8f0f-001f92d56f2b)
+
+
    * **Dataset Example (top_companies_historical_data.csv):**
      | Date       | Company           | Sector     | Country | Current Price | Market Cap | Trading Volume | Open Price | High Price | Low Price | Price Change (%) |
      |------------|-------------------|------------|---------|---------------|------------|----------------|------------|------------|-----------|------------------|
@@ -141,11 +146,14 @@ r_stock_data_input_screenshot.png)
 
 2. **Historical Data Dashboard:**
    * Allows users to select a company and a date range to view historical stock data.
-     ![Historical Dashboard Parameters](link_to_your_historical_data_dashboard_parameters_selection.png)
+    ![Historical_data_page](https://github.com/user-attachments/assets/3bf17960-eda1-4dc8-92a6-df3227728e9f)
    * Displays key performance indicators (trading days, low price, high price, average volume).
    * Presents a chart of the stock price history over the selected period.
    * Displays trend analysis information, including moving averages, trend direction and strength, and support and resistance levels.
-     ![Historical Data Dashboard](link_to_your_historical_data_screenshot.png)
+    ![Historical_data_result_page_1](https://github.com/user-attachments/assets/a86cd734-b8d6-4a01-9341-97a167a2f18a)  
+ 
+    ![Historical_data_result_page_2](https://github.com/user-attachments/assets/9d156a53-a6d2-4487-8f63-fc459c19ba4f)
+    ![Historical_data_result_page_3](https://github.com/user-attachments/assets/118ae697-57a4-4392-80da-f27bf0532200)
 
 ## Models
 
