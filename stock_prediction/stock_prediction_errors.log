@@ -1,0 +1,56 @@
+ERROR 2025-02-02 19:17:58,417 views 8512 16728 CSV file not found at data\top_companies_historical_data.csv
+ERROR 2025-02-02 19:18:41,544 views 8512 16728 CSV file not found at data\top_companies_historical_data.csv
+ERROR 2025-02-02 19:19:33,970 views 8512 15512 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-02 19:19:53,574 views 8512 16580 CSV file not found at data\top_companies_historical_data.csv
+ERROR 2025-02-02 19:22:04,547 views 8512 4336 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-02 19:22:22,878 views 8512 9596 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-02 19:31:40,879 views 8512 14232 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-02 19:32:48,444 views 8264 16824 Error in historical data view: Invalid comparison between dtype=datetime64[ns] and datetime
+ERROR 2025-02-02 19:38:17,877 views 8264 13588 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-02 19:59:17,801 views 2628 7572 Error in historical data view: Invalid block tag on line 290: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-02 19:59:28,764 views 2628 7572 Error in historical data view: Invalid block tag on line 290: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-02 20:09:08,799 views 2628 5380 Error in historical data view: Invalid block tag on line 263: 'endif', expected 'endblock'. Did you forget to register or load this tag?
+ERROR 2025-02-02 20:09:15,697 views 2628 17228 Error in historical data view: Invalid block tag on line 263: 'endif', expected 'endblock'. Did you forget to register or load this tag?
+ERROR 2025-02-02 20:09:30,307 views 2628 11880 Error in historical data view: Invalid block tag on line 263: 'endif', expected 'endblock'. Did you forget to register or load this tag?
+ERROR 2025-02-02 20:16:58,491 views 2628 6900 Error in historical data view: Unclosed tag on line 355: 'block'. Looking for one of: endblock.
+ERROR 2025-02-02 20:17:26,222 views 2628 8340 Error in historical data view: Unclosed tag on line 355: 'block'. Looking for one of: endblock.
+ERROR 2025-02-02 20:40:12,631 views 16664 17244 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-02 20:40:15,982 views 16664 7332 Error in trend analysis view: Error 10061 connecting to 127.0.0.1:6379. No connection could be made because the target machine actively refused it.
+ERROR 2025-02-03 07:51:23,482 views 17980 16920 Error in historical data view: Invalid filter: 'json_escape'
+ERROR 2025-02-03 08:08:03,366 views 17980 14928 Error in historical data view: Invalid block tag on line 392: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-03 08:08:35,675 views 17980 6776 Error in historical data view: Invalid block tag on line 392: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-03 08:10:35,200 views 17980 10364 Error in historical data view: Invalid block tag on line 392: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-03 08:12:42,007 views 17980 16824 Error in historical data view: Invalid block tag on line 392: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-03 08:12:43,678 views 17980 16824 Error in historical data view: Invalid block tag on line 392: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-02-03 08:12:59,664 views 17980 4404 Error in historical data view: Unclosed tag on line 181: 'if'. Looking for one of: elif, else, endif.
+ERROR 2025-02-03 08:44:49,939 views 17980 852 Error in historical data view: 'json_escape' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+l10n
+log
+static
+tz
+ERROR 2025-02-03 08:45:58,707 views 17980 852 Error in historical data view: 'json_escape' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+l10n
+log
+static
+tz
+ERROR 2025-02-03 08:49:01,643 views 17980 10544 Error in historical data view: 'json_escape' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+l10n
+log
+static
+tz
+ERROR 2025-02-03 10:46:15,172 views 18416 17080 Error in historical data view: Unclosed tag on line 355: 'block'. Looking for one of: endblock.
