@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Input Section -->
+    <section id="input-section" class="mb-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-input me-2"></i>Stock Data Input</h3>
+            </div>
+            <div class="card-body">
+                <form id="stock-form" class="input-form" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="company" class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="company" name="company" 
+                                       list="company-list" maxlength="50" required 
+                                       placeholder="Enter company name">
+                                <datalist id="company-list">
+                                    {% for company in companies %}
+                                    <option value="{{ company.Company }}">{{ company.Company }} ({{ company.Sector }})</option>
+                                    {% endfor %}
+                                </datalist>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sector" class="form-label">Sector</label>
+                                <select class="form-select" id="sector" name="sector" required>
+                                    <option value="">Select Sector</option>
+                                    {% for sector in sectors %}
+                                    <option value="{{ sector }}">{{ sector }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="market-cap" class="form-label">Market Cap (£ m)</label>
+                                <input type="number" class="form-control" id="market-cap" name="market-cap" 
+                                       min="0" max="1000000" step="0.01" required 
+                                       placeholder="Enter market cap">
+                            </div>
+                            <div class="mb-3">
+                                <label for="current-price" class="form-label">Current Price (£)</label>
+                                <input type="number" class="form-control" id="current-price" name="current-price" 
+                                       min="0" max="100000" step="0.01" required 
+                                       placeholder="Enter current price">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-chart-line me-2"></i>Generate Prediction
+                    </button>
+                    <div id="loading-indicator" class="text-center mt-3 d-none">
+                        <div class="spinner-border" style="color: #FF6B6B; width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 fw-bold" style="color: #2C3E50; font-size: 1.0rem;">Generating Prediction...</p>
+                    </div>
+                    </form>
+
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Predictions Section -->
+    <div id="prediction-results" class="mb-5 d-none">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Prediction Results for <span id="company-name"></span>
+                </h4>
+                <span class="badge bg-success">
+                    <i class="fas fa-check-circle me-1"></i>Prediction Successful
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Current Price</h6>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-pound-sign text-primary me-2"></i>
+                                        <h4 class="mb-0 text-dark" id="current-price-display">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Sector</h6>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-industry text-primary me-2"></i>
+                                        <h4 class="mb-0 text-dark" id="sector-display">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Confidence</h6>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-percent text-primary me-2"></i>
+                                        <h4 class="mb-0 text-success" id="confidence-display">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light p-3 rounded">
+                                    <h6 class="text-muted mb-2">Prediction Confidence</h6>
+                                    <div class="progress" style="height: 20px;">
+                                        <div id="confidence-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-primary mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-chart-line me-2"></i>LSTM Prediction
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0" id="lstm-prediction">-</h5>
+                                    <span class="badge bg-info" id="lstm-change">Change: -</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-danger mb-3">
+                            <div class="card-header bg-danger text-white">
+                                <i class="fas fa-random me-2"></i>Random Forest Prediction
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0" id="rf-prediction">-</h5>
+                                    <span class="badge bg-warning" id="rf-change">Change: -</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-light text-muted text-center">
+                <small id="prediction-timestamp">Prediction generated on -</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization Section -->
+    <section id="prediction-charts" class="mb-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Price Prediction Comparison</h5>
+                    </div>
+                    <div class="card-body chart-container" style="height: 400px;">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Model Performance Metrics</h5>
+                    </div>
+                    <div class="card-body chart-container" style="height: 400px;">
+                        <canvas id="metricsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize prediction chart
+    const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+    const predictionChart = new Chart(predictionCtx, {
+        type: 'line',
+        data: {
+            labels: ['Current', 'Day 1', 'Day 2', 'Day 3', 'Day 4'],
+            datasets: [
+                {
+                    label: 'LSTM Predictions',
+                    data: [0, 0, 0, 0, 0],
+                    borderColor: '#4BC0C0',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: false
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: false
+                    }
+                },
+                x: {
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Initialize metrics chart
+    const metricsCtx = document.getElementById('metricsChart').getContext('2d');
+    const metricsChart = new Chart(metricsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['MAE', 'RMSE', 'R2'],
+            datasets: [
+                {
+                    label: 'LSTM',
+                    data: [0, 0, 0],
+                    backgroundColor: '#4BC0C0',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Random Forest',
+                    data: [0, 0, 0],
+                    backgroundColor: '#FF6384',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: false
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Form submission handler (rest of the code remains the same as in the original template)
+    const stockForm = document.getElementById('stock-form');
+    stockForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Show loading indicator
+        document.getElementById('loading-indicator').classList.remove('d-none');
+
+
+        // Create FormData object
+        const formData = new FormData(stockForm);
+
+        // Fetch prediction data
+        fetch('/predict/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+        // Hide loading indicator
+         document.getElementById('loading-indicator').classList.add('d-none');
+
+            if (data.success) {
+                // Get current price from form
+                const currentPrice = parseFloat(document.getElementById('current-price').value);
+                const predictions = data.predictions;
+
+                // Update Prediction Chart
+                predictionChart.data.datasets[0].data = [
+                    currentPrice, 
+                    predictions.lstm, 
+                    predictions.rf
+                ];
+                predictionChart.update();
+
+                // Update Metrics Chart
+                metricsChart.data.datasets[0].data = [
+                    predictions.lstm_metrics.mae || 0,
+                    predictions.lstm_metrics.mse || 0,
+                    predictions.lstm_metrics.rmse || 0,
+                    predictions.lstm_metrics.r2 || 0
+                ];
+                metricsChart.data.datasets[1].data = [
+                    predictions.rf_metrics.mae || 0,
+                    predictions.rf_metrics.mse || 0,
+                    predictions.rf_metrics.rmse || 0,
+                    predictions.rf_metrics.r2 || 0
+                ];
+                metricsChart.update();
+
+                // Update dynamic elements
+                document.getElementById('company-name').textContent = data.company;
+                document.getElementById('current-price-display').textContent = `£${currentPrice.toFixed(2)}`;
+                document.getElementById('sector-display').textContent = data.sector;
+                
+                // Confidence
+                const confidencePercentage = (predictions.confidence * 100).toFixed(2);
+                document.getElementById('confidence-display').textContent = `${confidencePercentage}%`;
+                const confidenceProgress = document.getElementById('confidence-progress');
+                confidenceProgress.style.width = `${confidencePercentage}%`;
+                confidenceProgress.setAttribute('aria-valuenow', confidencePercentage);
+                confidenceProgress.textContent = `${confidencePercentage}%`;
+
+                // Predictions
+                document.getElementById('lstm-prediction').textContent = `£${predictions.lstm.toFixed(2)}`;
+                document.getElementById('rf-prediction').textContent = `£${predictions.rf.toFixed(2)}`;
+
+                // Change percentages
+                document.getElementById('lstm-change').textContent = `Change: ${predictions.lstm_change_percentage.toFixed(2)}%`;
+                document.getElementById('rf-change').textContent = `Change: ${predictions.rf_change_percentage.toFixed(2)}%`;
+
+                // Timestamp
+                document.getElementById('prediction-timestamp').textContent = `Prediction generated on ${new Date().toLocaleString()}`;
+
+                // Show the prediction results
+                document.getElementById('prediction-results').classList.remove('d-none');
+            } else {
+                // Handle prediction failure
+                const predictionResults = document.getElementById('prediction-results');
+                predictionResults.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        ${data.error || 'Prediction failed. Please check your input and try again.'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+                    // Hide loading indicator
+                     document.getElementById('loading-indicator').classList.add('d-none');
+        
+            console.error('Error:', error);
+            const predictionResults = document.getElementById('prediction-results');
+            predictionResults.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    An error occurred while generating predictions. Please try again later.
+                </div>
+            `;
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
