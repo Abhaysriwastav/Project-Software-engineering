@@ -63,7 +63,7 @@ stock_prediction/                # Root Project Directory
 
 1. **Clone the repository:**
 ```bash
-git clone [your_repository_url]
+git clone  # if cloning from Git
 cd stock_prediction
 ```
 
@@ -79,7 +79,7 @@ venv\Scripts\activate  # On Windows
 pip install -r requirements.txt
 ```
 
-The project requires the following libraries:
+Required libraries:
 ```
 Django==4.2.0
 numpy==1.24.3
@@ -90,18 +90,22 @@ matplotlib==3.7.1
 seaborn==0.12.2
 ```
 
-4. **Configure environment variables:**
-* Set up your environment variables according to the project documentation.
-* Ensure all required configuration variables are properly set for development and production environments.
-
-5. **Apply database migrations:**
+4. **Apply database migrations:**
 ```bash
 python manage.py migrate
 ```
 
-6. **Load historical data:**
+5. **Load historical data:**
 * Ensure the `top_companies_historical_data.csv` file is present in the `data/` directory in both the project root and the `stock_app` directory.
 * If the data needs to be loaded into the database, you can use a Django management command or a data loading script within the `stock_app` directory.
+Note: make sure that data is preset in the correct directory..
+
+6. **Runserver:**
+```bash
+python manage.py runserver
+```
+*It will open local host 
+https://127.0.0.1:8000/predict/
 
 ## Methodology
 
@@ -116,74 +120,187 @@ The project employs a multi-faceted approach to stock price prediction, combinin
 5. **Technical Analysis:** The `TrendAnalyzer` class is used to perform technical analysis, including calculating moving averages, detecting trends, and identifying support and resistance levels.
 6. **Visualization:** The predicted prices and historical data are visualized using Chart.js.
 
-## Dashboard Overview
+## Core Components and Code Examples
 
-The application provides two main dashboards:
+Here are key components and code snippets that illustrate how the project works:
 
-1. **Stock Prediction Dashboard:**
-   * **Input Section:** Allows users to input the company name, sector, market cap, and current price.
-   * **Screenshot of Input Parameters**
-  ![Dashboard_page_1](https://github.com/user-attachments/assets/22eb1d62-bcf4-4c93-8ea3-532dfd00a659)
-![Dashboard_page_1_half](https://github.com/user-attachments/assets/15f56ecc-44c1-4873-8686-5eccb4d4d113)
+### Data Preprocessing
 
+```python
+# Example from stock_app/utils/data_handler.py
+class DataPreprocessor:
+    def __init__(self, data):
+        self.data = data.copy()
 
-     
-   * **Prediction Results:**
-     * Displays the predicted stock prices for the next 7 days using both the LSTM and Random Forest models.
-     * Shows the percentage change from the current price.
-     * Displays the model's confidence level.
-     * Presents performance metrics for each model (MAE, RMSE, R2).
-     * Includes a chart comparing the predictions of the two models over the 7-day period.
-     * Features a chart comparing the performance metrics of the two models.
-      ![Dashboard_predection_result_page_1](https://github.com/user-attachments/assets/aef08383-30b7-4a03-8024-59d3474ec44f)
-      ![Dashboard_predection_result_page_2](https://github.com/user-attachments/assets/e0658675-8b7a-4cc5-8f0f-001f92d56f2b)
+    def handle_missing_values(self):
+        for col in self.data.columns:
+            self.data[col] = self.data[col].fillna(self.data[col].median())
+        return self.data
 
+    def preprocess(self):
+        self.data = self.handle_missing_values()
+        return self.data
+```
 
-   * **Dataset Example (top_companies_historical_data.csv):**
-     | Date       | Company           | Sector     | Country | Current Price | Market Cap | Trading Volume | Open Price | High Price | Low Price | Price Change (%) |
-     |------------|-------------------|------------|---------|---------------|------------|----------------|------------|------------|-----------|------------------|
-     | 03-02-2020 | UnitedHealth Group| Healthcare | USA     | 451.74        | 915205.66  | 35656907       | 456.12     | 460.94     | 449.25    | 0.39             |
+### Model Loading
 
-2. **Historical Data Dashboard:**
-   * Allows users to select a company and a date range to view historical stock data.
-    ![Historical_data_page](https://github.com/user-attachments/assets/3bf17960-eda1-4dc8-92a6-df3227728e9f)
-   * Displays key performance indicators (trading days, low price, high price, average volume).
-   * Presents a chart of the stock price history over the selected period.
-   * Displays trend analysis information, including moving averages, trend direction and strength, and support and resistance levels.
-    ![Historical_data_result_page_1](https://github.com/user-attachments/assets/a86cd734-b8d6-4a01-9341-97a167a2f18a)  
- 
-    ![Historical_data_result_page_2](https://github.com/user-attachments/assets/9d156a53-a6d2-4487-8f63-fc459c19ba4f)
-    ![Historical_data_result_page_3](https://github.com/user-attachments/assets/118ae697-57a4-4392-80da-f27bf0532200)
+```python
+# Example from stock_app/predictions.py
+def load_model(filename):
+    try:
+        filepath = os.path.join(settings.BASE_DIR, 'trained_models', filename)
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                return pickle.load(f)
+    except Exception as e:
+        logger.error(f"Error loading model {filename}: {e}")
+    return None
+```
+
+### Trend Analysis
+
+```python
+# Example from stock_app/utils/trend_analyzer.py
+class TrendAnalyzer:
+    def __init__(self, data):
+        self.data = data.copy()
+        self.data['Date'] = pd.to_datetime(self.data['Date'])
+
+    def calculate_moving_averages(self, company, windows=[5, 20, 50]):
+        company_data = self.data[self.data['Company'] == company].sort_values('Date')
+
+        results = {'company': company, 'moving_averages': {}}
+        for window in windows:
+            ma = company_data['Current Price (£)'].rolling(window=window).mean()
+            results['moving_averages'][f'MA{window}'] = ma.iloc[-1]
+
+        return results
+```
 
 ## Models
 
-* **LSTM Model (`lstm_model.py`):** A Long Short-Term Memory neural network model implemented using TensorFlow. Used for time series forecasting of stock prices. The LSTM model is constructed with the following:
-  * **Input:** The model takes sequences of stock data as input.
-  * **Layers:** It consists of LSTM layers, Batch Normalization, and Dropout to prevent overfitting.
-  * **Output:** Produces a prediction of the next stock price.
-  * **Training:** Adam optimizer is used to minimize the mean squared error between predicted and actual prices.
+### LSTM Model Implementation
+```python
+# Example code from stock_app/models/lstm_model.py
+def build_model(self, input_shape):
+    inputs = tf.keras.Input(shape=input_shape)
+    x = tf.keras.layers.LSTM(64, return_sequences=True)(inputs)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    x = tf.keras.layers.LSTM(32)(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    outputs = tf.keras.layers.Dense(1, activation='linear')(x)
 
-* **Random Forest Model (`random_forest_model.py`):** An ensemble learning method based on decision trees, implemented using scikit-learn. Used for stock price prediction. The Random Forest is set up as follows:
-  * **Input:** Takes stock features (e.g., current price, market cap) as input.
-  * **Ensemble of Trees:** Consists of multiple decision trees.
-  * **Output:** Generates predictions by averaging the predictions of individual trees.
-  * **Training:** The model uses the training data to learn patterns and relationships between features and stock prices.
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss='mean_squared_error',
+        metrics=['mae']
+    )
 
-* **Base Model (`base_model.py`):** An abstract base class that defines the common interface (`train`, `predict`, `evaluate`) for the machine learning models.
+    return model
+```
+
+### Random Forest Model Implementation
+```python
+# Example code from stock_app/models/random_forest_model.py
+class RandomForestModel:
+    def __init__(self):
+        self.model = RandomForestRegressor(n_estimators=200, random_state=42)
+
+    def prepare_data(self, data):
+        features = ['Current Price (£)', 'Market Cap (£ m)']
+        target = 'Current Price (£)'
+        X = data[features].values
+        y = data[target].values
+        X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
+        y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
+        mask = np.isfinite(X).all(axis=1) & np.isfinite(y)
+        X = X[mask]
+        y = y[mask]
+        X_scaled = self.scaler.fit_transform(X)
+
+        return X_scaled, y
+
+    def train_and_evaluate(self, data):
+        X, y = self.prepare_data(data)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y,
+            test_size=0.2,
+            random_state=42
+        )
+
+        self.model.fit(X_train, y_train)
+
+        y_pred = self.model.predict(X_test)
+
+        metrics = {
+            'mae': round(mean_absolute_error(y_test, y_pred), 4),
+            'mse': round(mean_squared_error(y_test, y_pred), 4),
+            'rmse': round(np.sqrt(mean_squared_error(y_test, y_pred)), 4),
+            'r2': round(r2_score(y_test, y_pred), 4),
+            'mape': round(mean_absolute_percentage_error(y_test, y_pred), 4)
+        }
+        return metrics
+```
+
+## Dashboard Overview
+
+1. **Stock Prediction Dashboard:**
+   * **Input Section:** Allows users to input the company name, sector, market cap, and current price.
+   ![Dashboard](Screenshots/Dashboard_page_1.png)
+   ![Dashboard](Screenshots/Dashboard_page_1_half.png)
+   * **Example Input:** You might input "Walmart Inc.", Sector "Retail", Market Cap "347.74", Current Price "460.24"
+   * **Prediction Results:**
+     * Displays predicted stock prices for the next 7 days using both models
+     * Shows percentage change from current price
+     * Displays model confidence level
+     * Presents performance metrics (MAE, RMSE, R2)
+   * **Example Predictions:** 
+     - LSTM Prediction: €427.13 (Change: -7.20%)
+     - Random Forest Prediction: €445.42 (Change: -3.22%)
+    ![Dashboard](Screenshots/Dashboard_Generating_prediction_loading_page.png) 
+    ![Dashboard](Screenshots/Dashboard_predection_result_page_1.png)
+    ![Dashboard](Screenshots/Dashboard_predection_result_page_2.png)    
+        
+
+
+2. **Historical Data Dashboard:**
+   * Allows users to select a company and date range
+   * Displays key performance indicators
+   * Shows stock price history chart
+   * Presents trend analysis information
+![Historical](Screenshots/Historical_data_result_page_1.png)
+![Historical](Screenshots/Historical_data_result_page_2.png)
+![Historical](Screenshots/Historical_data_result_page_3.png)
+
+## Dataset Example
+```
+| Date       | Company           | Sector     | Price | Market Cap | Volume  |
+|------------|------------------|------------|-------|------------|---------|
+| 03-02-2020 | UnitedHealth     | Healthcare | 451.74| 915205.66  | 35656907|
+```
 
 ## Future Scope
 
-The project has several potential areas for future development:
+* **Integration of Real-Time Data:** Connect to a real-time stock data API
+* **Advanced Technical Indicators:** Add MACD, RSI, Fibonacci retracements
+* **Sentiment Analysis:** Integrate news and social media analysis
+* **Portfolio Management:** Add virtual portfolio features
+* **User Customization:** Allow model and analysis customization
+* **Enhanced Visualization:** Improve interactive charts and graphs
+* **Deployment:** Deploy to production environment
+* **Model Improvements:** Add hyperparameters and algorithm updates
 
-* **Integration of Real-Time Data:** Connect to a real-time stock data API to provide up-to-date predictions.
-* **Advanced Technical Indicators:** Incorporate more advanced technical indicators, such as MACD, RSI, and Fibonacci retracements.
-* **Sentiment Analysis:** Integrate sentiment analysis of news articles and social media to improve prediction accuracy.
-* **Portfolio Management:** Add features for users to manage their virtual stock portfolios.
-* **User Customization:** Allow users to customize the models and analysis based on their preferences.
-* **Enhanced Visualization:** Improve the user interface and data visualization with more interactive charts and graphs.
-* **Deployment:** Deploy the application to a production environment (e.g., Heroku, AWS, Google Cloud) to make it accessible to a wider audience.
-* **Model Improvements:** Improve the model by adding more hyperparameters and changing the algorithm.
+## Screenshots
+![Login](Screenshots/Login_Page.png)
+![Logout](Screenshots/Logout_page.png)
+![Profile](Screenshots/Profile.png)
+![reset](Screenshots/Reset_password_page.png)
+![Register](Screenshots/Register_Page.png)
+
 
 
 ## Author
-Abhay Sriwastav
+Abhay sriwastav
