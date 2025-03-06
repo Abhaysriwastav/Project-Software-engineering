@@ -119,7 +119,7 @@ def prediction_view(request):
 @login_required
 def stock_prediction(request):
     """Handle stock prediction requests with comprehensive error handling."""
-    logger.debug("Entering stock_prediction function.")  
+    logger.debug("Entering stock_prediction function.")
     try:
         # Load training data
         training_data = load_training_data()
@@ -155,30 +155,31 @@ def stock_prediction(request):
                 if current_price <= 0 or current_price > 100000:
                     return JsonResponse({'success': False, 'error': 'Current price must be between 0 and 100,000'}, status=400)
 
-                # Use the predict_stock function
+                # Use the predict_stock function to get 7-day predictions
                 prediction_results = predict_stock(
-                    company_name=company, 
-                    sector=sector, 
-                    market_cap=market_cap, 
+                    company_name=company,
+                    sector=sector,
+                    market_cap=market_cap,
                     current_price=current_price,
-                    additional_training_data=training_data
+                    additional_training_data=training_data,
+                    num_days=7  # Specify the number of days to predict
                 )
                 logger.info(f"Prediction results: {prediction_results}")
 
                 # Extract predictions
-                lstm_prediction = prediction_results['predictions'].get('lstm_prediction', current_price)
-                rf_prediction = prediction_results['predictions'].get('rf_prediction', current_price)
+                lstm_predictions = prediction_results['predictions'].get('lstm_predictions', [current_price] * 7)
+                rf_predictions = prediction_results['predictions'].get('rf_predictions', [current_price] * 7)
 
-                # Calculate change percentage
-                change_percentage_lstm = round((lstm_prediction - current_price) / current_price * 100, 2)
-                change_percentage_rf = round((rf_prediction - current_price) / current_price * 100, 2)
+                # Calculate change percentages
+                lstm_change_percentages = [round((pred - current_price) / current_price * 100, 2) for pred in lstm_predictions]
+                rf_change_percentages = [round((pred - current_price) / current_price * 100, 2) for pred in rf_predictions]
 
                 # Prepare prediction response
                 predictions = {
-                    'lstm': round(lstm_prediction, 2),
-                    'rf': round(rf_prediction, 2),
-                    'lstm_change_percentage': change_percentage_lstm,
-                    'rf_change_percentage': change_percentage_rf,
+                    'lstm': [round(pred, 2) for pred in lstm_predictions],
+                    'rf': [round(pred, 2) for pred in rf_predictions],
+                    'lstm_change_percentage': lstm_change_percentages,
+                    'rf_change_percentage': rf_change_percentages,
                     'confidence': 0.85,
                     'lstm_metrics': prediction_results.get('lstm_metrics', {}),
                     'rf_metrics': prediction_results.get('rf_metrics', {})
